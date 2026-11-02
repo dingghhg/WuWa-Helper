@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0f1a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>WuWa Helper</title>
+<style>
+  :root{--bg:#0b0f1a;--card:#141a2b;--line:#243049;--text:#e6ecff;--dim:#8a97b8;--acc:#4de3ff;--acc2:#a78bfa;--ok:#4ade80;--warn:#fbbf24}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{padding:16px;text-align:center;border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:20px;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  nav{display:flex;gap:6px;padding:10px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+  nav button{flex:1;padding:10px 4px;background:var(--card);color:var(--dim);border:1px solid var(--line);border-radius:10px;font-size:14px;cursor:pointer}
+  nav button.on{color:var(--bg);background:var(--acc);border-color:var(--acc);font-weight:600}
+  main{max-width:620px;margin:0 auto;padding:14px}
+  section{display:none}section.on{display:block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .card h2{margin:0 0 10px;font-size:16px;color:var(--acc)}
+  label{display:block;font-size:13px;color:var(--dim);margin:10px 0 4px}
+  input,select{width:100%;padding:10px;background:#0e1424;color:var(--text);border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .row{display:flex;gap:10px}.row>*{flex:1}
+  button.btn{margin-top:12px;width:100%;padding:12px;background:linear-gradient(90deg,var(--acc),var(--acc2));color:#04101a;border:0;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer}
+  button.small{background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 10px;cursor:pointer}
+  .big{font-size:44px;font-weight:800;text-align:center;line-height:1.1}
+  .dim{color:var(--dim);font-size:14px}.center{text-align:center}
+  .bar{height:12px;background:#0e1424;border-radius:99px;overflow:hidden;margin:10px 0;border:1px solid var(--line)}
+  .bar>div{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0;transition:width .4s}
+  .task{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .task:last-child{border:0}
+  .task input[type=checkbox]{width:22px;height:22px;flex:none}
+  .task span{flex:1}.task.done span{text-decoration:line-through;color:var(--dim)}
+  .add{display:flex;gap:8px;margin-top:10px}.add input{flex:1}.add button{width:auto}
+  .pct{font-size:56px;font-weight:800;text-align:center;color:var(--ok)}
+  .note{font-size:13px;color:var(--dim);margin-top:8px}
+  details{margin-top:10px}summary{cursor:pointer;color:var(--dim);font-size:14px}
+</style>
+</head>
+<body>
+<header><h1>WuWa Helper</h1><div class="dim">Таймер · Чек-лист · Калькулятор круток</div></header>
+<nav>
+  <button data-tab="wp" class="on">Пластины</button>
+  <button data-tab="tasks">Задания</button>
+  <button data-tab="pull">Крутки</button>
+</nav>
+<main>
+
+<!-- ============ ПЛАСТИНЫ ============ -->
+<section id="wp" class="on">
+  <div class="card">
+    <h2>Волновые пластины</h2>
+    <div class="big" id="wpNow">0 / 240</div>
+    <div class="bar"><div id="wpBar"></div></div>
+    <div class="center dim" id="wpFull">—</div>
+    <div class="center dim" id="wpThr"></div>
+  </div>
+  <div class="card">
+    <h2>Обновить значение</h2>
+    <label>Сколько пластин сейчас в игре</label>
+    <input id="wpInput" type="number" min="0" max="240" inputmode="numeric" placeholder="например 120">
+    <button class="btn" id="wpSave">Сохранить</button>
+    <label>Напомнить, когда накопится (штук)</label>
+    <input id="wpThreshold" type="number" min="1" max="240" inputmode="numeric" value="240">
+    <button class="btn" id="wpNotify" style="background:var(--card);color:var(--acc);border:1px solid var(--acc)">Разрешить уведомления</button>
+    <div class="note">Уведомления приходят, пока сайт открыт во вкладке (даже свёрнутой). Если вкладку закрыть — таймер всё равно не собьётся, просто откройте сайт снова.</div>
+  </div>
+</section>
+
+<!-- ============ ЗАДАНИЯ ============ -->
+<section id="tasks">
+  <div class="card">
+    <h2>Сервер (для сброса в 04:00)</h2>
+    <select id="region">
+      <option value="-5">America (UTC−5)</option>
+      <option value="1">Europe (UTC+1)</option>
+      <option value="8">Asia / SEA / HMT (UTC+8)</option>
+    </select>
+    <div class="dim" id="resetIn" style="margin-top:8px"></div>
+  </div>
+  <div class="card"><h2>Каждый день</h2><div id="dailyList"></div>
+    <div class="add"><input id="dailyNew" placeholder="Новое задание"><button class="small" data-add="daily">+</button></div></div>
+  <div class="card"><h2>Каждую неделю (сброс в понедельник)</h2><div id="weeklyList"></div>
+    <div class="add"><input id="weeklyNew" placeholder="Новое задание"><button class="small" data-add="weekly">+</button></div></div>
+</section>
+
+<!-- ============ КРУТКИ ============ -->
+<section id="pull">
+  <div class="card">
+    <h2>Шанс получить нужного 5★</h2>
+    <div class="row">
+      <div><label>Конвены (шт.)</label><input id="pConvenes" type="number" min="0" value="0" inputmode="numeric"></div>
+      <div><label>Астриты</label><input id="pAstrite" type="number" min="0" value="0" inputmode="numeric"></div>
+    </div>
+    <div class="row">
+      <div><label>Круток с последней 5★</label><input id="pPity" type="number" min="0" max="79" value="0" inputmode="numeric"></div>
+      <div><label>Сколько копий нужно</label><input id="pCopies" type="number" min="1" max="7" value="1" inputmode="numeric"></div>
+    </div>
+    <label>Последняя 5★ была…</label>
+    <select id="pGuar">
+      <option value="0">не гарантированным персонажем (50/50)</option>
+      <option value="1">проигрышем 50/50 — следующий точно твой</option>
+    </select>
+    <button class="btn" id="pRun">Посчитать</button>
+  </div>
+  <div class="card" id="pRes" style="display:none">
+    <div class="pct" id="pPct">0%</div>
+    <div class="center dim" id="pText"></div>
+    <div class="bar"><div id="pBar"></div></div>
+  </div>
+  <div class="card">
+    <details>
+      <summary>Настройки шансов (поменяйте, если игра изменила правила)</summary>
+      <div class="row">
+        <div><label>Базовый шанс 5★, %</label><input id="cfgBase" type="number" step="0.1" value="0.8"></div>
+        <div><label>50/50 — шанс выиграть, %</label><input id="cfgWin" type="number" step="1" value="50"></div>
+      </div>
+      <div class="row">
+        <div><label>Мягкий гарант с крутки №</label><input id="cfgSoft" type="number" value="66"></div>
+        <div><label>Жёсткий гарант на крутке №</label><input id="cfgHard" type="number" value="80"></div>
+      </div>
+      <div class="row">
+        <div><label>Астритов за 1 крутку</label><input id="cfgCost" type="number" value="160"></div>
+        <div><label>Симуляций</label><input id="cfgSims" type="number" value="20000"></div>
+      </div>
+      <div class="note">Считаем методом Монте-Карло: «прокручиваем» ваши круталки 20 000 раз на компьютере и смотрим, в скольких случаях выпал нужный персонаж. Мягкий гарант упрощён: шанс растёт ровной линией от мягкого до жёсткого гаранта. Результат — оценка, а не обещание.</div>
+    </details>
+  </div>
+</section>
+
+</main>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const WP_MAX = 240, WP_MS = 6 * 60 * 1000;
+const KEY = 'wuwa-helper-v1';
+
+/* ---------- состояние ---------- */
+const defaults = {
+  wp: { value: 0, at: Date.now(), threshold: 240, notifiedFor: 0 },
+  region: '1',
+  tasks: {
+    daily: [
+      { id: 'd1', text: 'Ежедневные задания (100 активности)' },
+      { id: 'd2', text: 'Потратить пластины' },
+      { id: 'd3', text: 'Забрать награды за вход / почту' }
+    ],
+    weekly: [
+      { id: 'w1', text: 'Недельный босс' },
+      { id: 'w2', text: 'Башня Невзгод / Тактическая Голограмма' },
+      { id: 'w3', text: 'Недельный обмен в магазине' }
+    ]
+  },
+  done: { dailyKey: '', weeklyKey: '', daily: [], weekly: [] }
+};
+let S;
+try { S = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = defaults; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+/* ---------- вкладки ---------- */
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button,section').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); $('#' + b.dataset.tab).classList.add('on');
+});
+
+/* ---------- пластины ---------- */
+function wpCurrent(now) {
+  const v = S.wp.value;
+  if (v >= WP_MAX) return v;
+  return Math.min(WP_MAX, v + Math.floor((now - S.wp.at) / WP_MS));
+}
+const fmtTime = ms => new Date(ms).toLocaleString('ru-RU', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+function fmtLeft(ms) {
+  if (ms <= 0) return 'уже готово';
+  const m = Math.ceil(ms / 60000), h = Math.floor(m / 60);
+  return (h ? h + ' ч ' : '') + (m % 60) + ' мин';
+}
+function renderWp() {
+  const now = Date.now(), cur = wpCurrent(now);
+  $('#wpNow').textContent = cur + ' / ' + WP_MAX;
+  $('#wpBar').style.width = (cur / WP_MAX * 100) + '%';
+  const fullAt = S.wp.at + (WP_MAX - S.wp.value) * WP_MS;
+  $('#wpFull').textContent = cur >= WP_MAX ? 'Пластины заполнены — пора тратить!' :
+    'Полные в ' + fmtTime(fullAt) + ' (через ' + fmtLeft(fullAt - now) + ')';
+  const thr = Math.min(WP_MAX, Math.max(1, +S.wp.threshold || WP_MAX));
+  const thrAt = S.wp.at + (thr - S.wp.value) * WP_MS;
+  $('#wpThr').textContent = thr < WP_MAX && cur < thr ? 'Будет ' + thr + ' в ' + fmtTime(thrAt) : '';
+  // уведомление
+  if (cur >= thr && S.wp.notifiedFor !== S.wp.at && S.wp.value < thr) {
+    S.wp.notifiedFor = S.wp.at; save();
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('WuWa Helper', { body: 'Накопилось ' + cur + ' волновых пластин!', icon: 'icon.svg' });
+    }
+  }
+}
+$('#wpSave').onclick = () => {
+  const v = Math.max(0, Math.min(WP_MAX, parseInt($('#wpInput').value, 10)));
+  if (isNaN(v)) return;
+  S.wp = { value: v, at: Date.now(), threshold: +$('#wpThreshold').value || WP_MAX, notifiedFor: 0 };
+  save(); renderWp(); $('#wpInput').value = '';
+};
+$('#wpThreshold').value = S.wp.threshold;
+$('#wpThreshold').onchange = () => { S.wp.threshold = +$('#wpThreshold').value || WP_MAX; S.wp.notifiedFor = 0; save(); renderWp(); };
+$('#wpNotify').onclick = async () => {
+  if (!('Notification' in window)) return alert('Этот браузер не поддерживает уведомления.');
+  const r = await Notification.requestPermission();
+  $('#wpNotify').textContent = r === 'granted' ? 'Уведомления включены ✓' : 'Уведомления запрещены';
+};
+if ('Notification' in window && Notification.permission === 'granted') $('#wpNotify').textContent = 'Уведомления включены ✓';
+
+/* ---------- чек-листы ---------- */
+// «Игровое» время сервера: сдвигаем на смещение региона и вычитаем 4 часа (сброс в 04:00)
+function serverShifted() { return new Date(Date.now() + (+S.region) * 3600e3 - 4 * 3600e3); }
+function dayKey(d) { return d.toISOString().slice(0, 10); }
+function weekKey(d) {
+  const x = new Date(d); const dow = (x.getUTCDay() + 6) % 7; // пн = 0
+  x.setUTCDate(x.getUTCDate() - dow); return dayKey(x);
+}
+function checkReset() {
+  const d = serverShifted(), dk = dayKey(d), wk = weekKey(d);
+  if (S.done.dailyKey !== dk) { S.done.dailyKey = dk; S.done.daily = []; }
+  if (S.done.weeklyKey !== wk) { S.done.weeklyKey = wk; S.done.weekly = []; }
+  save();
+}
+function nextResetMs() {
+  const now = Date.now(), off = (+S.region) * 3600e3;
+  const sv = new Date(now + off);
+  const next = Date.UTC(sv.getUTCFullYear(), sv.getUTCMonth(), sv.getUTCDate(), 4);
+  let t = next - off; if (t <= now) t += 86400e3; return t - now;
+}
+function renderTasks() {
+  checkReset();
+  ['daily', 'weekly'].forEach(kind => {
+    const box = $('#' + kind + 'List'); box.innerHTML = '';
+    S.tasks[kind].forEach(t => {
+      const done = S.done[kind].includes(t.id);
+      const row = document.createElement('div'); row.className = 'task' + (done ? ' done' : '');
+      row.innerHTML = '<input type="checkbox"' + (done ? ' checked' : '') + '><span></span><button class="small">✕</button>';
+      row.querySelector('span').textContent = t.text;
+      row.querySelector('input').onchange = e => {
+        const arr = S.done[kind];
+        if (e.target.checked) arr.push(t.id); else arr.splice(arr.indexOf(t.id), 1);
+        save(); renderTasks();
+      };
+      row.querySelector('button').onclick = () => {
+        S.tasks[kind] = S.tasks[kind].filter(x => x.id !== t.id); save(); renderTasks();
+      };
+      box.appendChild(row);
+    });
+  });
+  $('#resetIn').textContent = 'Ежедневный сброс через ' + fmtLeft(nextResetMs());
+}
+document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+  const kind = b.dataset.add, inp = $('#' + kind + 'New'), text = inp.value.trim();
+  if (!text) return;
+  S.tasks[kind].push({ id: kind[0] + Date.now(), text }); inp.value = ''; save(); renderTasks();
+});
+$('#region').value = S.region;
+$('#region').onchange = () => { S.region = $('#region').value; save(); renderTasks(); };
+
+/* ---------- калькулятор круток ---------- */
+function makeChance(base, soft, hard) {
+  // n — номер текущей крутки с момента последней 5★ (1..hard)
+  return n => {
+    if (n >= hard) return 1;
+    if (n < soft) return base;
+    return base + (1 - base) * (n - soft + 1) / (hard - soft + 1);
+  };
+}
+function simulate(pulls, pity, guaranteed, copies, cfg) {
+  const chance = makeChance(cfg.base, cfg.soft, cfg.hard);
+  let success = 0;
+  for (let s = 0; s < cfg.sims; s++) {
+    let p = pity, g = guaranteed, got = 0;
+    for (let i = 0; i < pulls; i++) {
+      p++;
+      if (Math.random() < chance(p)) {
+        p = 0;
+        if (g || Math.random() < cfg.win) { got++; g = false; } else { g = true; }
+        if (got >= copies) break;
+      }
+    }
+    if (got >= copies) success++;
+  }
+  return success / cfg.sims;
+}
+$('#pRun').onclick = () => {
+  const cfg = {
+    base: (+$('#cfgBase').value || 0.8) / 100,
+    win: (+$('#cfgWin').value || 50) / 100,
+    soft: +$('#cfgSoft').value || 66,
+    hard: +$('#cfgHard').value || 80,
+    sims: Math.min(200000, Math.max(1000, +$('#cfgSims').value || 20000))
+  };
+  const cost = +$('#cfgCost').value || 160;
+  const pulls = (+$('#pConvenes').value || 0) + Math.floor((+$('#pAstrite').value || 0) / cost);
+  const pity = Math.max(0, Math.min(cfg.hard - 1, +$('#pPity').value || 0));
+  const copies = Math.max(1, +$('#pCopies').value || 1);
+  const g = $('#pGuar').value === '1';
+  $('#pRes').style.display = 'block';
+  $('#pPct').textContent = '…';
+  setTimeout(() => {
+    const r = simulate(pulls, pity, g, copies, cfg), pct = Math.round(r * 1000) / 10;
+    $('#pPct').textContent = pct + '%';
+    $('#pPct').style.color = r > .75 ? 'var(--ok)' : r > .35 ? 'var(--warn)' : '#f87171';
+    $('#pText').textContent = 'Круток всего: ' + pulls + '. Нужно копий: ' + copies + '.';
+    $('#pBar').style.width = pct + '%';
+  }, 30);
+};
+
+/* ---------- запуск ---------- */
+renderWp(); renderTasks();
+setInterval(() => { renderWp(); $('#resetIn').textContent = 'Ежедневный сброс через ' + fmtLeft(nextResetMs()); }, 1000);
+setInterval(renderTasks, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { renderWp(); renderTasks(); } });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
