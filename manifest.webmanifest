@@ -1,0 +1,13 @@
+{
+  "name": "WuWa Helper",
+  "short_name": "WuWa Helper",
+  "description": "Таймер волновых пластин, задания, калькулятор круток и планировщик прокачки для Wuthering Waves",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#151a22",
+  "theme_color": "#151a22",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
