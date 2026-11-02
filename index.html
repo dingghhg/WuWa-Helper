@@ -2,320 +2,887 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0b0f1a">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1319">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>WuWa Helper</title>
 <style>
-  :root{--bg:#0b0f1a;--card:#141a2b;--line:#243049;--text:#e6ecff;--dim:#8a97b8;--acc:#4de3ff;--acc2:#a78bfa;--ok:#4ade80;--warn:#fbbf24}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  header{padding:16px;text-align:center;border-bottom:1px solid var(--line)}
-  header h1{margin:0;font-size:20px;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  nav{display:flex;gap:6px;padding:10px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
-  nav button{flex:1;padding:10px 4px;background:var(--card);color:var(--dim);border:1px solid var(--line);border-radius:10px;font-size:14px;cursor:pointer}
-  nav button.on{color:var(--bg);background:var(--acc);border-color:var(--acc);font-weight:600}
-  main{max-width:620px;margin:0 auto;padding:14px}
-  section{display:none}section.on{display:block}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-  .card h2{margin:0 0 10px;font-size:16px;color:var(--acc)}
-  label{display:block;font-size:13px;color:var(--dim);margin:10px 0 4px}
-  input,select{width:100%;padding:10px;background:#0e1424;color:var(--text);border:1px solid var(--line);border-radius:8px;font-size:16px}
-  .row{display:flex;gap:10px}.row>*{flex:1}
-  button.btn{margin-top:12px;width:100%;padding:12px;background:linear-gradient(90deg,var(--acc),var(--acc2));color:#04101a;border:0;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer}
-  button.small{background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 10px;cursor:pointer}
-  .big{font-size:44px;font-weight:800;text-align:center;line-height:1.1}
-  .dim{color:var(--dim);font-size:14px}.center{text-align:center}
-  .bar{height:12px;background:#0e1424;border-radius:99px;overflow:hidden;margin:10px 0;border:1px solid var(--line)}
-  .bar>div{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0;transition:width .4s}
-  .task{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
-  .task:last-child{border:0}
-  .task input[type=checkbox]{width:22px;height:22px;flex:none}
-  .task span{flex:1}.task.done span{text-decoration:line-through;color:var(--dim)}
-  .add{display:flex;gap:8px;margin-top:10px}.add input{flex:1}.add button{width:auto}
-  .pct{font-size:56px;font-weight:800;text-align:center;color:var(--ok)}
+  :root{--bg:#0f1319;--card:#181e29;--card2:#202938;--line:#2b3548;--text:#e8edf6;--dim:#8b97ad;--gold:#e5c158;--teal:#4ef2d2;--bad:#ff6b7a;--ok:#4ade80}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(1100px 560px at 85% -10%,rgba(78,242,210,.09),transparent 60%),
+               radial-gradient(900px 500px at -10% 0,rgba(229,193,88,.08),transparent 60%),var(--bg);
+    color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  }
+  .top{display:flex;align-items:center;gap:12px;padding:14px 16px;max-width:1100px;margin:0 auto}
+  .logo{width:38px;height:38px;border-radius:11px}
+  .top h1{font-size:19px;margin:0;letter-spacing:.4px;line-height:1.2}
+  .top h1 b{color:var(--gold)}
+  .top small{display:block;color:var(--dim);font-size:12px;font-weight:400;letter-spacing:0}
+
+  /* ---------- навигация ---------- */
+  nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:4px;z-index:20;
+    background:rgba(24,30,41,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  nav button{flex:1;background:none;border:0;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:2px;
+    font:inherit;font-size:11px;padding:6px 2px;border-radius:12px;cursor:pointer;transition:background .2s,color .2s,transform .15s}
+  nav button .ic{font-size:20px;line-height:1.2;transition:transform .25s}
+  nav button.on{color:var(--teal);background:rgba(78,242,210,.09)}
+  nav button.on .ic{transform:translateY(-2px) scale(1.15)}
+  nav button:active{transform:scale(.93)}
+
+  main{max-width:1100px;margin:0 auto;padding:0 14px}
+  .view{display:none}
+  .view.on{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .grid{display:grid;gap:14px}
+  .span{grid-column:1/-1}
+
+  @media(min-width:760px){
+    body{padding-bottom:36px}
+    nav{position:static;max-width:1072px;margin:0 auto 16px;border:1px solid var(--line);border-radius:16px;padding:6px;width:calc(100% - 28px)}
+    nav button{flex-direction:row;justify-content:center;gap:8px;font-size:14px;padding:11px 8px}
+    nav button:hover:not(.on){background:rgba(255,255,255,.04);color:var(--text)}
+    .grid.two{grid-template-columns:1fr 1fr;align-items:start}
+    #toasts{bottom:28px!important}
+  }
+
+  /* ---------- карточки ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;transition:border-color .3s,box-shadow .3s}
+  .card h2{margin:0 0 12px;font-size:15px;letter-spacing:.6px;text-transform:uppercase;color:var(--gold)}
+  .card.alert{border-color:var(--gold);animation:glow 1.4s ease-in-out infinite}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(229,193,88,0)}50%{box-shadow:0 0 26px rgba(229,193,88,.35)}}
+  .dim{color:var(--dim)}
   .note{font-size:13px;color:var(--dim);margin-top:8px}
-  details{margin-top:10px}summary{cursor:pointer;color:var(--dim);font-size:14px}
+  .lbl{display:block;font-size:13px;color:var(--dim);margin:14px 0 6px}
+  .chead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .chead b{color:var(--teal);font-variant-numeric:tabular-nums}
+
+  /* ---------- поля и кнопки ---------- */
+  input:not([type=checkbox]),select{width:100%;padding:11px 12px;background:#121823;border:1px solid var(--line);border-radius:12px;
+    color:var(--text);font:inherit;font-size:16px;outline:none;transition:border-color .2s,box-shadow .2s}
+  input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(78,242,210,.15)}
+  .inline{display:flex;gap:10px;align-items:center}
+  .inline>input,.inline>select{flex:1;min-width:0}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{padding:11px 16px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--gold),#c79a2a);color:#1b1405;
+    font:inherit;font-weight:700;font-size:15px;cursor:pointer;transition:transform .15s,filter .2s;white-space:nowrap}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:scale(.95)}
+  .btn.ghost{background:transparent;color:var(--teal);border:1px solid rgba(78,242,210,.4)}
+  .btn.danger{background:transparent;color:var(--bad);border:1px solid rgba(255,107,122,.5)}
+  .btn.sm{padding:7px 12px;font-size:14px}
+  .btn.block{display:block;width:100%;margin-top:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:9px 14px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--text);
+    font:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:transform .15s,border-color .2s,color .2s}
+  .chip:active{transform:scale(.92)}
+  .chip.on{border-color:var(--teal);color:var(--teal)}
+  .chip.neg{color:#ffb3bb}
+  .sw{display:flex;align-items:center;gap:10px;margin-top:12px;cursor:pointer}
+  .sw input{width:20px;height:20px;accent-color:var(--teal)}
+  .x{background:none;border:0;color:var(--dim);font-size:16px;padding:8px;cursor:pointer;border-radius:8px;transition:color .2s}
+  .x:hover{color:var(--bad)}
+
+  /* ---------- пластины ---------- */
+  .gauge{position:relative;width:210px;height:210px;margin:4px auto 12px}
+  .gauge svg{width:100%;height:100%}
+  .gbg{fill:none;stroke:#222c3d;stroke-width:10}
+  .gfg{fill:none;stroke:url(#gg);stroke-width:10;stroke-linecap:round;stroke-dasharray:376.99;stroke-dashoffset:376.99;transition:stroke-dashoffset .6s ease}
+  .gtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gnum{font-size:54px;font-weight:800;line-height:1}
+  .stat{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+  .stat .r{display:flex;flex-direction:column;text-align:right}
+  .stat b{font-variant-numeric:tabular-nums}
+  .stat small{color:var(--teal);font-size:12px}
+  .banner{display:flex;gap:10px;justify-content:space-between;align-items:center;background:rgba(229,193,88,.12);
+    border:1px solid var(--gold);border-radius:12px;padding:10px 12px;margin-bottom:12px;color:var(--gold);font-weight:600}
+  .banner[hidden]{display:none}
+
+  /* ---------- задания ---------- */
+  .bar{height:8px;background:#121823;border-radius:99px;overflow:hidden;margin:6px 0 8px}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width .4s}
+  label.task{display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line);cursor:pointer;min-height:48px}
+  label.task input{width:22px;height:22px;accent-color:var(--teal);flex:none}
+  label.task span{flex:1;transition:color .2s}
+  label.task.done span{color:var(--dim);text-decoration:line-through}
+  .add{display:flex;gap:8px;margin-top:12px}
+  .add input{flex:1}
+  .timers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .timer{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+  .timer b{display:block;font-size:20px;color:var(--teal);font-variant-numeric:tabular-nums}
+  .timer span{font-size:12px;color:var(--dim)}
+
+  /* ---------- крутки ---------- */
+  .pct{font-size:64px;font-weight:800;line-height:1;text-align:center;transition:color .3s}
+  .pctsub{text-align:center;margin:4px 0 8px}
+  .chart svg{width:100%;height:auto;display:block}
+  .chart .cg{stroke:#263146;stroke-width:1}
+  .chart .ct{fill:var(--dim);font-size:9px}
+  .chart .cl{fill:none;stroke:var(--teal);stroke-width:2.5;stroke-linejoin:round}
+  .chart .cm{stroke:var(--gold);stroke-width:1.5;stroke-dasharray:4 3}
+  details summary{cursor:pointer;color:var(--gold);font-weight:600;list-style:none;display:flex;justify-content:space-between}
+  details summary::after{content:"▾";transition:transform .2s}
+  details[open] summary::after{transform:rotate(180deg)}
+  details[open] summary{margin-bottom:6px}
+
+  /* ---------- прокачка ---------- */
+  .goal{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+  .goal-head{display:flex;gap:6px;align-items:center}
+  .g4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .g4 label{font-size:12px;color:var(--dim)}
+  .g4 input{margin-top:3px;padding:9px 10px}
+  .res{font-size:13px;color:var(--teal);margin-top:8px}
+  .wk{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .wk b{width:30px;color:var(--dim)}
+  .wk.today b{color:var(--gold)}
+  .wk.today input{border-color:var(--gold)}
+  @media(min-width:760px){.g4{grid-template-columns:repeat(4,1fr)}}
+
+  /* ---------- toasts ---------- */
+  #toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));z-index:50;
+    display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
+  .toast{background:#242d3d;border:1px solid var(--line);padding:10px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.45);
+    animation:pop .25s ease;transition:opacity .4s}
+  .toast.gold{border-color:var(--gold);color:var(--gold)}
+  .toast.bad{border-color:var(--bad);color:var(--bad)}
+  .toast.out{opacity:0}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
-<header><h1>WuWa Helper</h1><div class="dim">Таймер · Чек-лист · Калькулятор круток</div></header>
-<nav>
-  <button data-tab="wp" class="on">Пластины</button>
-  <button data-tab="tasks">Задания</button>
-  <button data-tab="pull">Крутки</button>
+
+<header class="top">
+  <img class="logo" src="icon.svg" alt="">
+  <h1>WuWa <b>Helper</b><small>Помощник для игроков Wuthering Waves</small></h1>
+</header>
+
+<nav id="nav">
+  <button data-tab="wp" class="on"><span class="ic">⚡</span><span>Пластины</span></button>
+  <button data-tab="tasks"><span class="ic">✅</span><span>Задания</span></button>
+  <button data-tab="gacha"><span class="ic">🎲</span><span>Крутки</span></button>
+  <button data-tab="plan"><span class="ic">🛠️</span><span>Прокачка</span></button>
+  <button data-tab="data"><span class="ic">⚙️</span><span>Данные</span></button>
 </nav>
+
 <main>
+<noscript><div class="card">Для работы нужен JavaScript.</div></noscript>
 
-<!-- ============ ПЛАСТИНЫ ============ -->
-<section id="wp" class="on">
-  <div class="card">
-    <h2>Волновые пластины</h2>
-    <div class="big" id="wpNow">0 / 240</div>
-    <div class="bar"><div id="wpBar"></div></div>
-    <div class="center dim" id="wpFull">—</div>
-    <div class="center dim" id="wpThr"></div>
-  </div>
-  <div class="card">
-    <h2>Обновить значение</h2>
-    <label>Сколько пластин сейчас в игре</label>
-    <input id="wpInput" type="number" min="0" max="240" inputmode="numeric" placeholder="например 120">
-    <button class="btn" id="wpSave">Сохранить</button>
-    <label>Напомнить, когда накопится (штук)</label>
-    <input id="wpThreshold" type="number" min="1" max="240" inputmode="numeric" value="240">
-    <button class="btn" id="wpNotify" style="background:var(--card);color:var(--acc);border:1px solid var(--acc)">Разрешить уведомления</button>
-    <div class="note">Уведомления приходят, пока сайт открыт во вкладке (даже свёрнутой). Если вкладку закрыть — таймер всё равно не собьётся, просто откройте сайт снова.</div>
-  </div>
-</section>
-
-<!-- ============ ЗАДАНИЯ ============ -->
-<section id="tasks">
-  <div class="card">
-    <h2>Сервер (для сброса в 04:00)</h2>
-    <select id="region">
-      <option value="-5">America (UTC−5)</option>
-      <option value="1">Europe (UTC+1)</option>
-      <option value="8">Asia / SEA / HMT (UTC+8)</option>
-    </select>
-    <div class="dim" id="resetIn" style="margin-top:8px"></div>
-  </div>
-  <div class="card"><h2>Каждый день</h2><div id="dailyList"></div>
-    <div class="add"><input id="dailyNew" placeholder="Новое задание"><button class="small" data-add="daily">+</button></div></div>
-  <div class="card"><h2>Каждую неделю (сброс в понедельник)</h2><div id="weeklyList"></div>
-    <div class="add"><input id="weeklyNew" placeholder="Новое задание"><button class="small" data-add="weekly">+</button></div></div>
-</section>
-
-<!-- ============ КРУТКИ ============ -->
-<section id="pull">
-  <div class="card">
-    <h2>Шанс получить нужного 5★</h2>
-    <div class="row">
-      <div><label>Конвены (шт.)</label><input id="pConvenes" type="number" min="0" value="0" inputmode="numeric"></div>
-      <div><label>Астриты</label><input id="pAstrite" type="number" min="0" value="0" inputmode="numeric"></div>
+<!-- ======================= ПЛАСТИНЫ ======================= -->
+<section class="view on" id="v-wp">
+  <div class="grid two">
+    <div class="card" id="wpCard">
+      <h2>Волновые пластины</h2>
+      <div class="banner" id="wpBanner" hidden><span id="wpBannerText"></span><button class="btn sm" id="wpAck">Ок</button></div>
+      <div class="gauge">
+        <svg viewBox="0 0 140 140" aria-hidden="true">
+          <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ef2d2"/><stop offset="1" stop-color="#e5c158"/></linearGradient></defs>
+          <circle class="gbg" cx="70" cy="70" r="60"/>
+          <circle class="gfg" id="gfg" cx="70" cy="70" r="60" transform="rotate(-90 70 70)"/>
+        </svg>
+        <div class="gtxt"><div class="gnum" id="wpNow">0</div><div class="dim">из 240</div></div>
+      </div>
+      <div class="stat"><span>До следующей пластины</span><b id="wpNext">—</b></div>
+      <div class="stat"><span>До 240 / 240</span><div class="r"><b id="wpFull">—</b><small id="wpFullAt"></small></div></div>
+      <div class="stat"><span id="wpTgLabel">До цели</span><div class="r"><b id="wpTg">—</b><small id="wpTgAt"></small></div></div>
     </div>
-    <div class="row">
-      <div><label>Круток с последней 5★</label><input id="pPity" type="number" min="0" max="79" value="0" inputmode="numeric"></div>
-      <div><label>Сколько копий нужно</label><input id="pCopies" type="number" min="1" max="7" value="1" inputmode="numeric"></div>
+
+    <div class="card">
+      <h2>Управление</h2>
+      <label class="lbl" for="wpInput">Сколько пластин сейчас в игре</label>
+      <div class="inline">
+        <input id="wpInput" type="number" min="0" max="240" inputmode="numeric" placeholder="0–240">
+        <button class="btn" id="wpSet">Задать</button>
+      </div>
+
+      <label class="lbl">Быстро изменить</label>
+      <div class="chips">
+        <button class="chip" data-wpd="20">+20</button>
+        <button class="chip" data-wpd="60">+60</button>
+        <button class="chip neg" data-wpd="-40">−40</button>
+        <button class="chip neg" data-wpd="-60">−60</button>
+      </div>
+      <div class="note">+20 / +60 — быстрые добавки (например, от предметов восстановления). −40 / −60 — потратили на подземелье или босса.</div>
+
+      <label class="lbl" for="wpTarget">Хочу узнать, когда накопится (штук)</label>
+      <div class="inline"><input id="wpTarget" type="number" min="1" max="240" inputmode="numeric"></div>
+      <div class="chips" style="margin-top:10px">
+        <button class="chip" data-tg="60">60</button>
+        <button class="chip" data-tg="120">120</button>
+        <button class="chip" data-tg="180">180</button>
+        <button class="chip" data-tg="240">240</button>
+      </div>
+
+      <label class="sw"><input type="checkbox" id="optSound"><span>Звуковой сигнал</span></label>
+      <label class="sw"><input type="checkbox" id="optPush"><span>Push-уведомление</span></label>
+      <div class="inline" style="margin-top:12px">
+        <button class="btn ghost" id="btnPerm">Разрешить уведомления</button>
+        <button class="btn ghost" id="btnTest">Проверить сигнал</button>
+      </div>
+      <div class="note" id="permNote"></div>
     </div>
-    <label>Последняя 5★ была…</label>
-    <select id="pGuar">
-      <option value="0">не гарантированным персонажем (50/50)</option>
-      <option value="1">проигрышем 50/50 — следующий точно твой</option>
-    </select>
-    <button class="btn" id="pRun">Посчитать</button>
-  </div>
-  <div class="card" id="pRes" style="display:none">
-    <div class="pct" id="pPct">0%</div>
-    <div class="center dim" id="pText"></div>
-    <div class="bar"><div id="pBar"></div></div>
-  </div>
-  <div class="card">
-    <details>
-      <summary>Настройки шансов (поменяйте, если игра изменила правила)</summary>
-      <div class="row">
-        <div><label>Базовый шанс 5★, %</label><input id="cfgBase" type="number" step="0.1" value="0.8"></div>
-        <div><label>50/50 — шанс выиграть, %</label><input id="cfgWin" type="number" step="1" value="50"></div>
-      </div>
-      <div class="row">
-        <div><label>Мягкий гарант с крутки №</label><input id="cfgSoft" type="number" value="66"></div>
-        <div><label>Жёсткий гарант на крутке №</label><input id="cfgHard" type="number" value="80"></div>
-      </div>
-      <div class="row">
-        <div><label>Астритов за 1 крутку</label><input id="cfgCost" type="number" value="160"></div>
-        <div><label>Симуляций</label><input id="cfgSims" type="number" value="20000"></div>
-      </div>
-      <div class="note">Считаем методом Монте-Карло: «прокручиваем» ваши круталки 20 000 раз на компьютере и смотрим, в скольких случаях выпал нужный персонаж. Мягкий гарант упрощён: шанс растёт ровной линией от мягкого до жёсткого гаранта. Результат — оценка, а не обещание.</div>
-    </details>
   </div>
 </section>
 
+<!-- ======================= ЗАДАНИЯ ======================= -->
+<section class="view" id="v-tasks">
+  <div class="grid two">
+    <div class="card span">
+      <h2>Сервер и сброс</h2>
+      <label class="lbl" for="region">Ваш сервер (сброс в 04:00 по его времени)</label>
+      <select id="region">
+        <option value="eu">Europe (UTC+1)</option>
+        <option value="am">America (UTC−5)</option>
+        <option value="as">Asia (UTC+8)</option>
+        <option value="sea">SEA (UTC+8)</option>
+      </select>
+      <div class="timers">
+        <div class="timer"><b id="resetDaily">—</b><span>до дневного сброса</span></div>
+        <div class="timer"><b id="resetWeekly">—</b><span>до недельного сброса (пн)</span></div>
+      </div>
+      <button class="btn ghost block" id="btnUncheck">Сбросить все галочки</button>
+    </div>
+
+    <div class="card">
+      <div class="chead"><h2>Каждый день</h2><b id="dailyProg">0 / 0</b></div>
+      <div class="bar"><i id="dailyBar"></i></div>
+      <div id="dailyList"></div>
+      <div class="add"><input id="dailyNew" maxlength="80" placeholder="Своё задание"><button class="btn sm" data-add="daily">Добавить</button></div>
+    </div>
+
+    <div class="card">
+      <div class="chead"><h2>Каждую неделю</h2><b id="weeklyProg">0 / 0</b></div>
+      <div class="bar"><i id="weeklyBar"></i></div>
+      <div id="weeklyList"></div>
+      <div class="add"><input id="weeklyNew" maxlength="80" placeholder="Своё задание"><button class="btn sm" data-add="weekly">Добавить</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= КРУТКИ ======================= -->
+<section class="view" id="v-gacha">
+  <div class="grid two">
+    <div class="card">
+      <h2>Что у вас есть</h2>
+      <div class="row2">
+        <div><label class="lbl" for="gAstrite">Астриты</label><input id="gAstrite" type="number" min="0" inputmode="numeric"></div>
+        <div><label class="lbl" for="gConvenes">Крутки (Radiant Tide)</label><input id="gConvenes" type="number" min="0" inputmode="numeric"></div>
+      </div>
+      <div class="row2">
+        <div><label class="lbl" for="gPity">Крутки с последней 5★ (0–79)</label><input id="gPity" type="number" min="0" max="79" inputmode="numeric"></div>
+        <div><label class="lbl" for="gCopies">Цель</label>
+          <select id="gCopies">
+            <option value="1">S0 — 1 копия</option><option value="2">S1 — 2 копии</option><option value="3">S2 — 3 копии</option>
+            <option value="4">S3 — 4 копии</option><option value="5">S4 — 5 копий</option><option value="6">S5 — 6 копий</option><option value="7">S6 — 7 копий</option>
+          </select></div>
+      </div>
+      <label class="lbl" for="gGuar">Последняя 5★ была…</label>
+      <select id="gGuar">
+        <option value="0">не гарантированной (впереди 50/50)</option>
+        <option value="1">проигрышем 50/50 (следующая 5★ точно ваша)</option>
+      </select>
+      <button class="btn block" id="gRun">Рассчитать</button>
+      <div class="note">Астриты автоматически переводятся в крутки. Для баннера считаются только Radiant Tide.</div>
+    </div>
+
+    <div class="card">
+      <h2>Результат</h2>
+      <div class="pct" id="gChance">0%</div>
+      <div class="pctsub dim">шанс получить цель</div>
+      <div class="bar"><i id="gBar"></i></div>
+      <div class="stat"><span>Круток всего</span><b id="gTotal">0</b></div>
+      <div class="stat"><span>Гарантированно получите</span><b id="gSure">—</b></div>
+      <div class="stat"><span>Худший сценарий</span><b id="gWorst">—</b></div>
+      <div class="stat"><span>Не хватает до худшего</span><b id="gLack">—</b></div>
+      <div class="stat"><span>Обычно хватает (50% / 90%)</span><b id="gMed">—</b></div>
+    </div>
+
+    <div class="card span">
+      <h2>Шанс в зависимости от числа круток</h2>
+      <div class="chart" id="gChart"></div>
+      <div class="note">Золотая линия — сколько круток у вас сейчас. Правый край — худший сценарий.</div>
+    </div>
+
+    <div class="card span">
+      <details>
+        <summary>Настройки шансов</summary>
+        <div class="note" style="margin-top:0">Если разработчики поменяют правила, исправьте значения здесь. Сверьте их с игрой: по умолчанию стоят приблизительные.</div>
+        <div class="row2">
+          <div><label class="lbl" for="cBase">Базовый шанс 5★, %</label><input id="cBase" type="number" step="0.1" inputmode="decimal"></div>
+          <div><label class="lbl" for="cWin">Шанс выиграть 50/50, %</label><input id="cWin" type="number" step="1" inputmode="decimal"></div>
+          <div><label class="lbl" for="cSoft">Мягкий гарант с крутки №</label><input id="cSoft" type="number" inputmode="numeric"></div>
+          <div><label class="lbl" for="cHard">Жёсткий гарант на крутке №</label><input id="cHard" type="number" inputmode="numeric"></div>
+          <div><label class="lbl" for="cCost">Астритов за 1 крутку</label><input id="cCost" type="number" inputmode="numeric"></div>
+          <div><label class="lbl" for="cSims">Симуляций (точность)</label><input id="cSims" type="number" inputmode="numeric"></div>
+        </div>
+        <button class="btn ghost block" id="cReset">Вернуть значения по умолчанию</button>
+        <div class="note">Как это считается: компьютер «прокручивает» ваши крутки тысячи раз с учётом гаранта и 50/50 и смотрит, в скольких случаях цель выпала. Шанс растёт ровной линией от мягкого до жёсткого гаранта. Это оценка, а не обещание.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= ПРОКАЧКА ======================= -->
+<section class="view" id="v-plan">
+  <div class="grid two">
+    <div class="card">
+      <h2>Планировщик материалов</h2>
+      <div id="goalList"></div>
+      <button class="btn ghost block" id="goalAdd">+ Добавить цель</button>
+      <div class="stat" style="margin-top:14px"><span>Заходов всего</span><b id="plRuns">0</b></div>
+      <div class="stat"><span>Пластин всего</span><b id="plWp">0</b></div>
+      <div class="stat"><span>Накопить недостающее</span><b id="plWait" style="text-align:right">—</b></div>
+      <div class="note">Введите, сколько материала нужно и сколько есть, сколько падает за один заход и сколько пластин он стоит. Стоимость по умолчанию 40, поменяйте, если у вашего подземелья другая. Время считается с учётом пластин, которые уже есть в трекере.</div>
+    </div>
+
+    <div class="card">
+      <h2>Памятка по дням недели</h2>
+      <div id="weekList"></div>
+      <div class="note">Запишите, что фармить в какой день (например, материалы оружия или навыков). Расписание подземелий меняется с патчами, поэтому сверьтесь с игрой. Сегодняшний день подсвечен.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= ДАННЫЕ ======================= -->
+<section class="view" id="v-data">
+  <div class="grid two">
+    <div class="card">
+      <h2>Резервная копия</h2>
+      <p class="dim" style="margin-top:0">Всё хранится только в этом браузере. Сохраните файл, чтобы перенести данные на другое устройство или не потерять их при очистке браузера.</p>
+      <button class="btn block" id="btnExport">Экспорт данных (JSON)</button>
+      <button class="btn ghost block" id="btnImport">Импорт данных (JSON)</button>
+      <input type="file" id="fileImport" accept=".json,application/json" hidden>
+    </div>
+    <div class="card">
+      <h2>Сброс</h2>
+      <p class="dim" style="margin-top:0">Удалит таймер, задания, настройки и цели прокачки без возможности восстановления. Сначала сделайте экспорт.</p>
+      <button class="btn danger block" id="btnWipe">Сбросить все данные</button>
+      <div class="note">Совет: на телефоне откройте меню браузера и выберите «Добавить на главный экран». Сайт будет работать как приложение, в том числе без интернета.</div>
+    </div>
+  </div>
+</section>
 </main>
+
+<template id="goalTpl">
+  <div class="goal">
+    <div class="goal-head"><input data-f="name" maxlength="40" placeholder="Название цели"><button type="button" class="x" data-del aria-label="Удалить">✕</button></div>
+    <div class="g4">
+      <label>Есть<input data-f="have" type="number" min="0" inputmode="numeric"></label>
+      <label>Нужно<input data-f="need" type="number" min="0" inputmode="numeric"></label>
+      <label>Падает за заход<input data-f="drop" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      <label>Пластин за заход<input data-f="cost" type="number" min="0" inputmode="numeric"></label>
+    </div>
+    <div class="res"></div>
+  </div>
+</template>
+
+<div id="toasts" aria-live="polite"></div>
 
 <script>
 'use strict';
-const $ = s => document.querySelector(s);
-const WP_MAX = 240, WP_MS = 6 * 60 * 1000;
-const KEY = 'wuwa-helper-v1';
+/* ====================================================================
+   WuWa Helper — всё в одном файле. Данные хранятся в localStorage.
+   ==================================================================== */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const WP_MAX = 240, WP_MS = 6 * 60 * 1000, GC = 376.99;
+const KEY = 'wuwa-helper-v2', OLD_KEY = 'wuwa-helper-v1';
+const TABS = ['wp', 'tasks', 'gacha', 'plan', 'data'];
+const REG = { eu: 1, am: -5, as: 8, sea: 8 };
+const DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+const num = (v, d = 0) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const pad = n => String(n).padStart(2, '0');
 
 /* ---------- состояние ---------- */
-const defaults = {
-  wp: { value: 0, at: Date.now(), threshold: 240, notifiedFor: 0 },
-  region: '1',
+const defaults = () => ({
+  tab: 'wp',
+  wp: { value: 0, at: Date.now(), target: 180, notifiedFor: 0, ackFor: 0, sound: true, push: true },
+  region: 'eu',
   tasks: {
-    daily: [
-      { id: 'd1', text: 'Ежедневные задания (100 активности)' },
-      { id: 'd2', text: 'Потратить пластины' },
-      { id: 'd3', text: 'Забрать награды за вход / почту' }
-    ],
-    weekly: [
-      { id: 'w1', text: 'Недельный босс' },
-      { id: 'w2', text: 'Башня Невзгод / Тактическая Голограмма' },
-      { id: 'w3', text: 'Недельный обмен в магазине' }
-    ]
+    daily:  [{ id: 'd1', text: 'Ежедневная активность' }, { id: 'd2', text: 'Трата пластин' }, { id: 'd3', text: 'Переработка эхо' }],
+    weekly: [{ id: 'w1', text: 'Боссы недели' }, { id: 'w2', text: 'Башня Невзгод' }, { id: 'w3', text: 'Недельные обмены в магазине' }]
   },
-  done: { dailyKey: '', weeklyKey: '', daily: [], weekly: [] }
-};
-let S;
-try { S = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = defaults; }
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
-
-/* ---------- вкладки ---------- */
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav button,section').forEach(x => x.classList.remove('on'));
-  b.classList.add('on'); $('#' + b.dataset.tab).classList.add('on');
+  done: { dailyKey: '', weeklyKey: '', daily: [], weekly: [] },
+  cfg: { base: 0.8, win: 50, soft: 65, hard: 80, cost: 160, sims: 20000 },
+  gacha: { astrite: 0, convenes: 0, pity: 0, guar: '0', copies: 1 },
+  plan: { goals: [], week: ['', '', '', '', '', '', ''] }
 });
 
-/* ---------- пластины ---------- */
-function wpCurrent(now) {
-  const v = S.wp.value;
-  if (v >= WP_MAX) return v;
-  return Math.min(WP_MAX, v + Math.floor((now - S.wp.at) / WP_MS));
+function merge(def, src) {
+  if (!src || typeof src !== 'object' || Array.isArray(src)) return def;
+  const out = { ...def };
+  for (const k in def) {
+    if (!(k in src)) continue;
+    const d = def[k], s = src[k];
+    if (Array.isArray(d)) out[k] = Array.isArray(s) ? s : d;
+    else if (d && typeof d === 'object') out[k] = merge(d, s);
+    else if (typeof s === typeof d) out[k] = s;
+  }
+  return out;
 }
-const fmtTime = ms => new Date(ms).toLocaleString('ru-RU', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
-function fmtLeft(ms) {
-  if (ms <= 0) return 'уже готово';
-  const m = Math.ceil(ms / 60000), h = Math.floor(m / 60);
-  return (h ? h + ' ч ' : '') + (m % 60) + ' мин';
+
+function sanitize(s) {
+  s.wp.value = clamp(Math.round(num(s.wp.value)), 0, WP_MAX);
+  s.wp.target = clamp(Math.round(num(s.wp.target, 180)), 1, WP_MAX);
+  if (!isFinite(s.wp.at) || s.wp.at <= 0 || s.wp.at > Date.now() + 60000) s.wp.at = Date.now();
+  if (!(s.region in REG)) s.region = { '1': 'eu', '-5': 'am', '8': 'as' }[s.region] || 'eu';
+  if (!TABS.includes(s.tab)) s.tab = 'wp';
+  for (const k of ['daily', 'weekly']) {
+    s.tasks[k] = s.tasks[k].filter(t => t && typeof t.text === 'string' && t.text.trim())
+      .map((t, i) => ({ id: String(t.id || k[0] + i + Date.now()), text: t.text.slice(0, 80) }));
+    s.done[k] = s.done[k].filter(x => typeof x === 'string');
+  }
+  s.plan.goals = s.plan.goals.filter(g => g && typeof g === 'object').slice(0, 30).map((g, i) => ({
+    id: String(g.id || 'g' + Date.now() + i), name: String(g.name || '').slice(0, 40),
+    have: Math.max(0, num(g.have)), need: Math.max(0, num(g.need)),
+    drop: Math.max(0, num(g.drop, 1)), cost: Math.max(0, num(g.cost, 40))
+  }));
+  s.plan.week = Array.from({ length: 7 }, (_, i) => String(s.plan.week[i] || '').slice(0, 60));
+  for (const k of ['astrite', 'convenes', 'pity']) s.gacha[k] = Math.max(0, num(s.gacha[k]));
+  s.gacha.copies = clamp(Math.round(num(s.gacha.copies, 1)), 1, 7);
+  s.gacha.guar = s.gacha.guar === '1' ? '1' : '0';
+  return s;
+}
+
+let S;
+function load() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  if (!raw) { // перенос данных из первой версии
+    try {
+      const o = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
+      if (o) raw = { wp: { ...(o.wp || {}), target: (o.wp && o.wp.threshold) || 180 }, region: o.region, tasks: o.tasks, done: o.done };
+    } catch (e) {}
+  }
+  S = sanitize(merge(defaults(), raw));
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ---------- мелкие помощники ---------- */
+function toast(msg, kind) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || ''); t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.classList.add('out'), 3200);
+  setTimeout(() => t.remove(), 3700);
+}
+function fmtDur(ms) {
+  if (ms <= 0) return '0с';
+  const s = Math.ceil(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return h ? h + 'ч ' + pad(m) + 'м ' + pad(x) + 'с' : m ? m + 'м ' + pad(x) + 'с' : x + 'с';
+}
+function fmtLong(ms) {
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+  return ((d ? d + ' д ' : '') + (h ? h + ' ч ' : '') + (!d ? m + ' мин' : '')).trim() || '0 мин';
+}
+function fmtAt(ts) {
+  const d = new Date(ts), n = new Date(), t = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  const dd = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(n.getFullYear(), n.getMonth(), n.getDate())) / 864e5);
+  if (dd <= 0) return t;
+  if (dd === 1) return 'завтра, ' + t;
+  return DAYS[(d.getDay() + 6) % 7] + ', ' + t;
+}
+
+/* ---------- звук и уведомления ---------- */
+let AC = null;
+function unlockAudio() {
+  try {
+    if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+    if (AC && AC.state === 'suspended') AC.resume();
+  } catch (e) {}
+}
+['click', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, unlockAudio, { passive: true }));
+function beep() {
+  unlockAudio(); if (!AC) return;
+  const t0 = AC.currentTime;
+  [660, 880, 1320].forEach((f, i) => {
+    const o = AC.createOscillator(), g = AC.createGain(), a = t0 + i * 0.18;
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, a);
+    g.gain.linearRampToValueAtTime(0.25, a + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, a + 0.3);
+    o.connect(g); g.connect(AC.destination); o.start(a); o.stop(a + 0.32);
+  });
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+async function pushNotify(title, body) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    const reg = ('serviceWorker' in navigator) ? await navigator.serviceWorker.getRegistration() : null;
+    if (reg && reg.showNotification) {
+      await reg.showNotification(title, { body, icon: 'icon.svg', badge: 'icon.svg', tag: 'wuwa-wp', vibrate: [200, 100, 200] });
+      return;
+    }
+  } catch (e) {}
+  try { new Notification(title, { body, icon: 'icon.svg' }); } catch (e) {}
+}
+function updatePermNote() {
+  const n = $('#permNote');
+  if (!('Notification' in window)) { n.textContent = 'Этот браузер не поддерживает уведомления. Работают звук и сообщение на экране.'; return; }
+  n.textContent = {
+    granted: 'Уведомления разрешены. Они приходят, пока сайт открыт (или установлен как приложение).',
+    denied: 'Уведомления запрещены в настройках браузера. Работают звук и сообщение на экране.',
+    default: 'Нажмите «Разрешить уведомления», чтобы получать сигнал о накоплении пластин.'
+  }[Notification.permission];
+}
+
+/* ---------- вкладки ---------- */
+function showTab(t) {
+  $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + t));
+  S.tab = t; save(); window.scrollTo({ top: 0 });
+}
+$$('#nav button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+/* ====================================================================
+   1. ПЛАСТИНЫ
+   ==================================================================== */
+const wpCur = (now = Date.now()) =>
+  S.wp.value >= WP_MAX ? WP_MAX : Math.min(WP_MAX, S.wp.value + Math.floor(Math.max(0, now - S.wp.at) / WP_MS));
+function wpTimeTo(n, now) {
+  if (wpCur(now) >= n) return 0;
+  return S.wp.at + (n - S.wp.value) * WP_MS - now;
+}
+function wpChange(delta) { // меняем количество, не теряя прогресс до следующей пластины
+  const now = Date.now(), cur = wpCur(now);
+  const partial = cur >= WP_MAX ? 0 : Math.max(0, now - S.wp.at) % WP_MS;
+  const nv = clamp(cur + delta, 0, WP_MAX);
+  S.wp.value = nv; S.wp.at = nv >= WP_MAX ? now : now - partial;
+  S.wp.notifiedFor = 0; S.wp.ackFor = 0;
+  save(); renderWp();
+}
+function setTarget(v) {
+  if (isNaN(v)) return;
+  S.wp.target = clamp(v, 1, WP_MAX); S.wp.notifiedFor = 0; S.wp.ackFor = 0;
+  save(); $('#wpTarget').value = S.wp.target; markChips(); renderWp();
+}
+function markChips() { $$('[data-tg]').forEach(c => c.classList.toggle('on', +c.dataset.tg === S.wp.target)); }
+
+function alertReached(cur) {
+  const msg = 'Накопилось ' + cur + ' волновых пластин (цель ' + S.wp.target + ')';
+  toast('⚡ ' + msg, 'gold');
+  if (S.wp.sound) beep();
+  if (S.wp.push) pushNotify('WuWa Helper', msg);
 }
 function renderWp() {
-  const now = Date.now(), cur = wpCurrent(now);
-  $('#wpNow').textContent = cur + ' / ' + WP_MAX;
-  $('#wpBar').style.width = (cur / WP_MAX * 100) + '%';
-  const fullAt = S.wp.at + (WP_MAX - S.wp.value) * WP_MS;
-  $('#wpFull').textContent = cur >= WP_MAX ? 'Пластины заполнены — пора тратить!' :
-    'Полные в ' + fmtTime(fullAt) + ' (через ' + fmtLeft(fullAt - now) + ')';
-  const thr = Math.min(WP_MAX, Math.max(1, +S.wp.threshold || WP_MAX));
-  const thrAt = S.wp.at + (thr - S.wp.value) * WP_MS;
-  $('#wpThr').textContent = thr < WP_MAX && cur < thr ? 'Будет ' + thr + ' в ' + fmtTime(thrAt) : '';
-  // уведомление
-  if (cur >= thr && S.wp.notifiedFor !== S.wp.at && S.wp.value < thr) {
-    S.wp.notifiedFor = S.wp.at; save();
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('WuWa Helper', { body: 'Накопилось ' + cur + ' волновых пластин!', icon: 'icon.svg' });
-    }
-  }
-}
-$('#wpSave').onclick = () => {
-  const v = Math.max(0, Math.min(WP_MAX, parseInt($('#wpInput').value, 10)));
-  if (isNaN(v)) return;
-  S.wp = { value: v, at: Date.now(), threshold: +$('#wpThreshold').value || WP_MAX, notifiedFor: 0 };
-  save(); renderWp(); $('#wpInput').value = '';
-};
-$('#wpThreshold').value = S.wp.threshold;
-$('#wpThreshold').onchange = () => { S.wp.threshold = +$('#wpThreshold').value || WP_MAX; S.wp.notifiedFor = 0; save(); renderWp(); };
-$('#wpNotify').onclick = async () => {
-  if (!('Notification' in window)) return alert('Этот браузер не поддерживает уведомления.');
-  const r = await Notification.requestPermission();
-  $('#wpNotify').textContent = r === 'granted' ? 'Уведомления включены ✓' : 'Уведомления запрещены';
-};
-if ('Notification' in window && Notification.permission === 'granted') $('#wpNotify').textContent = 'Уведомления включены ✓';
+  const now = Date.now(), cur = wpCur(now), tg = S.wp.target;
+  $('#wpNow').textContent = cur;
+  $('#gfg').style.strokeDashoffset = GC * (1 - cur / WP_MAX);
 
-/* ---------- чек-листы ---------- */
-// «Игровое» время сервера: сдвигаем на смещение региона и вычитаем 4 часа (сброс в 04:00)
-function serverShifted() { return new Date(Date.now() + (+S.region) * 3600e3 - 4 * 3600e3); }
-function dayKey(d) { return d.toISOString().slice(0, 10); }
-function weekKey(d) {
-  const x = new Date(d); const dow = (x.getUTCDay() + 6) % 7; // пн = 0
-  x.setUTCDate(x.getUTCDate() - dow); return dayKey(x);
+  const next = cur >= WP_MAX ? null : WP_MS - (Math.max(0, now - S.wp.at) % WP_MS);
+  $('#wpNext').textContent = next == null ? 'заполнено' : fmtDur(next);
+
+  const fullMs = wpTimeTo(WP_MAX, now);
+  $('#wpFull').textContent = fullMs <= 0 ? 'заполнено' : fmtDur(fullMs);
+  $('#wpFullAt').textContent = fullMs <= 0 ? '' : 'Full at ' + fmtAt(now + fullMs);
+
+  const tMs = wpTimeTo(tg, now);
+  $('#wpTgLabel').textContent = 'До цели (' + tg + ')';
+  $('#wpTg').textContent = tMs <= 0 ? 'достигнута' : fmtDur(tMs);
+  $('#wpTgAt').textContent = tMs <= 0 ? '' : 'Ready at ' + fmtAt(now + tMs);
+
+  const reached = S.wp.value < tg && cur >= tg;
+  if (reached && S.wp.notifiedFor !== S.wp.at) { S.wp.notifiedFor = S.wp.at; save(); alertReached(cur); }
+  const showBanner = reached && S.wp.ackFor !== S.wp.at;
+  $('#wpBanner').hidden = !showBanner;
+  $('#wpCard').classList.toggle('alert', showBanner);
+  if (showBanner) $('#wpBannerText').textContent = 'Цель ' + tg + ' достигнута! Сейчас ' + cur + ' / ' + WP_MAX;
+}
+
+$('#wpSet').onclick = () => {
+  const v = parseInt($('#wpInput').value, 10);
+  if (isNaN(v)) return toast('Введите число от 0 до 240', 'bad');
+  S.wp.value = clamp(v, 0, WP_MAX); S.wp.at = Date.now(); S.wp.notifiedFor = 0; S.wp.ackFor = 0;
+  save(); $('#wpInput').value = ''; renderWp(); toast('Сохранено: ' + S.wp.value + ' / 240');
+};
+$('#wpInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('#wpSet').click(); });
+$$('[data-wpd]').forEach(b => b.onclick = () => wpChange(+b.dataset.wpd));
+$$('[data-tg]').forEach(b => b.onclick = () => setTarget(+b.dataset.tg));
+$('#wpTarget').onchange = () => setTarget(parseInt($('#wpTarget').value, 10));
+$('#wpAck').onclick = () => { S.wp.ackFor = S.wp.at; save(); renderWp(); };
+$('#optSound').onchange = e => { S.wp.sound = e.target.checked; save(); };
+$('#optPush').onchange = e => { S.wp.push = e.target.checked; save(); };
+$('#btnPerm').onclick = async () => {
+  if (!('Notification' in window)) return toast('Браузер не поддерживает уведомления', 'bad');
+  try { await Notification.requestPermission(); } catch (e) {}
+  updatePermNote();
+};
+$('#btnTest').onclick = () => { toast('⚡ Проверка сигнала', 'gold'); beep(); pushNotify('WuWa Helper', 'Проверка уведомления'); };
+
+/* ====================================================================
+   2. ЗАДАНИЯ И СБРОС
+   ==================================================================== */
+const serverNow = () => new Date(Date.now() + REG[S.region] * 36e5);   // «настенное» время сервера (читать через getUTC*)
+const shifted = () => new Date(serverNow().getTime() - 4 * 36e5);       // игровой день начинается в 04:00
+const dayKey = d => d.toISOString().slice(0, 10);
+function weekKey(d) { const x = new Date(d); x.setUTCDate(x.getUTCDate() - ((x.getUTCDay() + 6) % 7)); return dayKey(x); }
+function msToDaily() {
+  const sv = serverNow(); let t = Date.UTC(sv.getUTCFullYear(), sv.getUTCMonth(), sv.getUTCDate(), 4);
+  if (t <= sv.getTime()) t += 864e5; return t - sv.getTime();
+}
+function msToWeekly() {
+  const sv = serverNow(), dow = (sv.getUTCDay() + 6) % 7;
+  let t = Date.UTC(sv.getUTCFullYear(), sv.getUTCMonth(), sv.getUTCDate(), 4) + ((7 - dow) % 7) * 864e5;
+  if (t <= sv.getTime()) t += 7 * 864e5; return t - sv.getTime();
 }
 function checkReset() {
-  const d = serverShifted(), dk = dayKey(d), wk = weekKey(d);
-  if (S.done.dailyKey !== dk) { S.done.dailyKey = dk; S.done.daily = []; }
-  if (S.done.weeklyKey !== wk) { S.done.weeklyKey = wk; S.done.weekly = []; }
-  save();
+  const d = shifted(), dk = dayKey(d), wk = weekKey(d); let changed = false;
+  if (S.done.dailyKey !== dk) { changed = changed || S.done.dailyKey !== ''; S.done.dailyKey = dk; S.done.daily = []; save(); }
+  if (S.done.weeklyKey !== wk) { changed = changed || S.done.weeklyKey !== ''; S.done.weeklyKey = wk; S.done.weekly = []; save(); }
+  return changed;
 }
-function nextResetMs() {
-  const now = Date.now(), off = (+S.region) * 3600e3;
-  const sv = new Date(now + off);
-  const next = Date.UTC(sv.getUTCFullYear(), sv.getUTCMonth(), sv.getUTCDate(), 4);
-  let t = next - off; if (t <= now) t += 86400e3; return t - now;
+function renderTimers() {
+  $('#resetDaily').textContent = fmtDur(msToDaily());
+  $('#resetWeekly').textContent = fmtLong(msToWeekly());
 }
 function renderTasks() {
   checkReset();
-  ['daily', 'weekly'].forEach(kind => {
-    const box = $('#' + kind + 'List'); box.innerHTML = '';
+  for (const kind of ['daily', 'weekly']) {
+    const box = $('#' + kind + 'List'); box.replaceChildren();
     S.tasks[kind].forEach(t => {
       const done = S.done[kind].includes(t.id);
-      const row = document.createElement('div'); row.className = 'task' + (done ? ' done' : '');
-      row.innerHTML = '<input type="checkbox"' + (done ? ' checked' : '') + '><span></span><button class="small">✕</button>';
-      row.querySelector('span').textContent = t.text;
-      row.querySelector('input').onchange = e => {
+      const row = document.createElement('label'); row.className = 'task' + (done ? ' done' : '');
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = done;
+      const sp = document.createElement('span'); sp.textContent = t.text;
+      const del = document.createElement('button'); del.type = 'button'; del.className = 'x'; del.textContent = '✕'; del.setAttribute('aria-label', 'Удалить');
+      cb.onchange = () => {
         const arr = S.done[kind];
-        if (e.target.checked) arr.push(t.id); else arr.splice(arr.indexOf(t.id), 1);
+        if (cb.checked) { if (!arr.includes(t.id)) arr.push(t.id); } else { const i = arr.indexOf(t.id); if (i >= 0) arr.splice(i, 1); }
         save(); renderTasks();
       };
-      row.querySelector('button').onclick = () => {
-        S.tasks[kind] = S.tasks[kind].filter(x => x.id !== t.id); save(); renderTasks();
+      del.onclick = e => {
+        e.preventDefault();
+        S.tasks[kind] = S.tasks[kind].filter(x => x.id !== t.id);
+        S.done[kind] = S.done[kind].filter(x => x !== t.id);
+        save(); renderTasks();
       };
-      box.appendChild(row);
+      row.append(cb, sp, del); box.append(row);
     });
-  });
-  $('#resetIn').textContent = 'Ежедневный сброс через ' + fmtLeft(nextResetMs());
-}
-document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
-  const kind = b.dataset.add, inp = $('#' + kind + 'New'), text = inp.value.trim();
-  if (!text) return;
-  S.tasks[kind].push({ id: kind[0] + Date.now(), text }); inp.value = ''; save(); renderTasks();
-});
-$('#region').value = S.region;
-$('#region').onchange = () => { S.region = $('#region').value; save(); renderTasks(); };
-
-/* ---------- калькулятор круток ---------- */
-function makeChance(base, soft, hard) {
-  // n — номер текущей крутки с момента последней 5★ (1..hard)
-  return n => {
-    if (n >= hard) return 1;
-    if (n < soft) return base;
-    return base + (1 - base) * (n - soft + 1) / (hard - soft + 1);
-  };
-}
-function simulate(pulls, pity, guaranteed, copies, cfg) {
-  const chance = makeChance(cfg.base, cfg.soft, cfg.hard);
-  let success = 0;
-  for (let s = 0; s < cfg.sims; s++) {
-    let p = pity, g = guaranteed, got = 0;
-    for (let i = 0; i < pulls; i++) {
-      p++;
-      if (Math.random() < chance(p)) {
-        p = 0;
-        if (g || Math.random() < cfg.win) { got++; g = false; } else { g = true; }
-        if (got >= copies) break;
-      }
-    }
-    if (got >= copies) success++;
+    const total = S.tasks[kind].length, d = S.tasks[kind].filter(t => S.done[kind].includes(t.id)).length;
+    $('#' + kind + 'Prog').textContent = d + ' / ' + total;
+    $('#' + kind + 'Bar').style.width = (total ? d / total * 100 : 0) + '%';
   }
-  return success / cfg.sims;
+  renderTimers(); markToday();
 }
-$('#pRun').onclick = () => {
-  const cfg = {
-    base: (+$('#cfgBase').value || 0.8) / 100,
-    win: (+$('#cfgWin').value || 50) / 100,
-    soft: +$('#cfgSoft').value || 66,
-    hard: +$('#cfgHard').value || 80,
-    sims: Math.min(200000, Math.max(1000, +$('#cfgSims').value || 20000))
+$$('[data-add]').forEach(b => {
+  const kind = b.dataset.add, inp = $('#' + kind + 'New');
+  const add = () => {
+    const text = inp.value.trim().slice(0, 80); if (!text) return;
+    S.tasks[kind].push({ id: kind[0] + Date.now(), text }); inp.value = ''; save(); renderTasks();
   };
-  const cost = +$('#cfgCost').value || 160;
-  const pulls = (+$('#pConvenes').value || 0) + Math.floor((+$('#pAstrite').value || 0) / cost);
-  const pity = Math.max(0, Math.min(cfg.hard - 1, +$('#pPity').value || 0));
-  const copies = Math.max(1, +$('#pCopies').value || 1);
-  const g = $('#pGuar').value === '1';
-  $('#pRes').style.display = 'block';
-  $('#pPct').textContent = '…';
-  setTimeout(() => {
-    const r = simulate(pulls, pity, g, copies, cfg), pct = Math.round(r * 1000) / 10;
-    $('#pPct').textContent = pct + '%';
-    $('#pPct').style.color = r > .75 ? 'var(--ok)' : r > .35 ? 'var(--warn)' : '#f87171';
-    $('#pText').textContent = 'Круток всего: ' + pulls + '. Нужно копий: ' + copies + '.';
-    $('#pBar').style.width = pct + '%';
-  }, 30);
+  b.onclick = add; inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+});
+$('#region').onchange = () => { S.region = $('#region').value; S.done.dailyKey = ''; S.done.weeklyKey = ''; checkReset(); save(); renderTasks(); };
+$('#btnUncheck').onclick = () => { S.done.daily = []; S.done.weekly = []; save(); renderTasks(); toast('Все галочки сброшены'); };
+
+/* ====================================================================
+   3. КАЛЬКУЛЯТОР КРУТОК
+   ==================================================================== */
+function readCfg() {
+  const c = S.cfg, hard = clamp(Math.round(num(c.hard, 80)), 2, 200);
+  return {
+    base: clamp(num(c.base, 0.8), 0.01, 50), win: clamp(num(c.win, 50), 0, 100),
+    soft: clamp(Math.round(num(c.soft, 65)), 1, hard), hard,
+    cost: Math.max(1, num(c.cost, 160)), sims: clamp(Math.round(num(c.sims, 20000)), 1000, 200000)
+  };
+}
+function chanceFn(c) {
+  const base = c.base / 100;
+  return n => n >= c.hard ? 1 : n < c.soft ? base : base + (1 - base) * (n - c.soft + 1) / (c.hard - c.soft + 1);
+}
+function simulate(pity, guar, copies, c) {
+  const f = chanceFn(c), win = c.win / 100, out = new Uint16Array(c.sims);
+  for (let s = 0; s < c.sims; s++) {
+    let p = pity, g = guar, got = 0, n = 0;
+    while (got < copies) {
+      n++; p++;
+      if (Math.random() < f(p)) { p = 0; if (g || Math.random() < win) { got++; g = false; } else g = true; }
+    }
+    out[s] = n;
+  }
+  out.sort(); return out;
+}
+function cdf(arr, n) { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] <= n) lo = m + 1; else hi = m; } return lo / arr.length; }
+const quant = (arr, q) => arr[Math.min(arr.length - 1, Math.floor(q * arr.length))];
+const firstCost = (pity, guar, hard) => (hard - pity) + (guar ? 0 : hard);
+const worstNeed = (copies, pity, guar, hard) => firstCost(pity, guar, hard) + (copies - 1) * 2 * hard;
+function sureCopies(pulls, pity, guar, hard) {
+  const f = firstCost(pity, guar, hard); return pulls < f ? 0 : 1 + Math.floor((pulls - f) / (2 * hard));
+}
+function chartSVG(arr, pulls, worst) {
+  const W = 320, H = 140, L = 30, B = 18, T = 8, R = 8, pw = W - L - R, ph = H - T - B;
+  const maxX = Math.max(worst, pulls, 1), X = n => L + pw * n / maxX, Y = p => T + ph * (1 - p);
+  const step = Math.max(1, Math.ceil(maxX / 80));
+  let d = '';
+  for (let n = 0; n <= maxX; n += step) d += (d ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(cdf(arr, n)).toFixed(1);
+  d += 'L' + X(maxX).toFixed(1) + ' ' + Y(cdf(arr, maxX)).toFixed(1);
+  let grid = '';
+  [0, .25, .5, .75, 1].forEach(p => {
+    grid += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(p) + '" y2="' + Y(p) + '" class="cg"/>' +
+            '<text x="' + (L - 4) + '" y="' + (Y(p) + 3) + '" class="ct" text-anchor="end">' + Math.round(p * 100) + '%</text>';
+  });
+  const mx = X(Math.min(pulls, maxX)).toFixed(1);
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="График шанса">' + grid +
+    '<path d="' + d + '" class="cl"/><line x1="' + mx + '" x2="' + mx + '" y1="' + T + '" y2="' + (T + ph) + '" class="cm"/>' +
+    '<text x="' + L + '" y="' + (H - 4) + '" class="ct">0</text>' +
+    '<text x="' + mx + '" y="' + (H - 4) + '" class="ct" text-anchor="middle" fill="#e5c158">' + pulls + '</text>' +
+    '<text x="' + (W - R) + '" y="' + (H - 4) + '" class="ct" text-anchor="end">' + maxX + '</text></svg>';
+}
+function calcGacha() {
+  const c = readCfg(), g = S.gacha;
+  const pulls = Math.floor(Math.max(0, g.convenes)) + Math.floor(Math.max(0, g.astrite) / c.cost);
+  const pity = clamp(Math.floor(g.pity), 0, c.hard - 1), copies = clamp(Math.floor(g.copies), 1, 7), guar = g.guar === '1';
+  const arr = simulate(pity, guar, copies, c), p = cdf(arr, pulls), pct = Math.round(p * 1000) / 10;
+  const worst = worstNeed(copies, pity, guar, c.hard), lack = Math.max(0, worst - pulls), sure = sureCopies(pulls, pity, guar, c.hard);
+
+  const el = $('#gChance'); el.textContent = pct + '%';
+  el.style.color = p >= .75 ? 'var(--ok)' : p >= .35 ? 'var(--gold)' : 'var(--bad)';
+  $('#gBar').style.width = pct + '%';
+  $('#gTotal').textContent = pulls;
+  $('#gSure').textContent = sure >= 1 ? sure + ' шт. (S' + (sure - 1) + ')'
+    : 'пока нет (для гарантии первой копии нужно ещё ' + (firstCost(pity, guar, c.hard) - pulls) + ' круток)';
+  $('#gWorst').textContent = worst + ' круток (' + (worst * c.cost) + ' астритов)';
+  $('#gLack').textContent = lack === 0 ? 'хватает ✓' : lack + ' круток (≈ ' + (lack * c.cost) + ' астритов)';
+  $('#gMed').textContent = quant(arr, .5) + ' / ' + quant(arr, .9) + ' круток';
+  $('#gChart').innerHTML = chartSVG(arr, pulls, worst);
+}
+let gTimer;
+const calcSoon = () => { clearTimeout(gTimer); gTimer = setTimeout(calcGacha, 250); };
+const GF = { gAstrite: 'astrite', gConvenes: 'convenes', gPity: 'pity', gGuar: 'guar', gCopies: 'copies' };
+const CF = { cBase: 'base', cWin: 'win', cSoft: 'soft', cHard: 'hard', cCost: 'cost', cSims: 'sims' };
+for (const id in GF) ['input', 'change'].forEach(ev => $('#' + id).addEventListener(ev, e => {
+  const f = GF[id], v = e.target.value; S.gacha[f] = (f === 'guar') ? v : num(v, f === 'copies' ? 1 : 0); save(); calcSoon();
+}));
+for (const id in CF) ['input', 'change'].forEach(ev => $('#' + id).addEventListener(ev, e => {
+  S.cfg[CF[id]] = num(e.target.value, defaults().cfg[CF[id]]); save(); calcSoon();
+}));
+$('#gRun').onclick = calcGacha;
+$('#cReset').onclick = () => { S.cfg = defaults().cfg; save(); setControls(); calcGacha(); toast('Настройки шансов сброшены'); };
+
+/* ====================================================================
+   4. ПЛАНИРОВЩИК ПРОКАЧКИ
+   ==================================================================== */
+function goalCalc(g) {
+  const left = Math.max(0, g.need - g.have), runs = g.drop > 0 ? Math.ceil(left / g.drop) : 0;
+  return { left, runs, wp: runs * g.cost };
+}
+function goalRes(el, g) {
+  const c = goalCalc(g);
+  el.querySelector('.res').textContent = c.left === 0 ? (g.need > 0 ? 'Готово ✓ материалов хватает' : '')
+    : g.drop > 0 ? 'Осталось ' + c.left + ' → ' + c.runs + ' заходов → ' + c.wp + ' пластин' : 'Укажите, сколько падает за заход';
+}
+function updatePlanSummary() {
+  let runs = 0, wp = 0;
+  S.plan.goals.forEach(g => { const c = goalCalc(g); runs += c.runs; wp += c.wp; });
+  const extra = Math.max(0, wp - wpCur());
+  $('#plRuns').textContent = runs; $('#plWp').textContent = wp;
+  $('#plWait').textContent = wp === 0 ? '—' : extra === 0 ? 'пластин уже хватает ✓' : fmtLong(extra * WP_MS) + ' (к ' + fmtAt(Date.now() + extra * WP_MS) + ')';
+}
+function renderPlan() {
+  const box = $('#goalList'); box.replaceChildren();
+  if (!S.plan.goals.length) {
+    const p = document.createElement('div'); p.className = 'note';
+    p.textContent = 'Пока пусто. Добавьте цель, например материалы для вознесения персонажа или оружия.'; box.append(p);
+  }
+  S.plan.goals.forEach(g => {
+    const el = $('#goalTpl').content.firstElementChild.cloneNode(true);
+    $$('[data-f]', el).forEach(inp => {
+      const f = inp.dataset.f; inp.value = g[f];
+      inp.addEventListener('input', () => {
+        g[f] = f === 'name' ? inp.value.slice(0, 40) : Math.max(0, num(inp.value));
+        save(); goalRes(el, g); updatePlanSummary();
+      });
+    });
+    $('[data-del]', el).onclick = () => { S.plan.goals = S.plan.goals.filter(x => x.id !== g.id); save(); renderPlan(); };
+    goalRes(el, g); box.append(el);
+  });
+  updatePlanSummary();
+}
+$('#goalAdd').onclick = () => {
+  if (S.plan.goals.length >= 30) return toast('Максимум 30 целей', 'bad');
+  S.plan.goals.push({ id: 'g' + Date.now(), name: '', have: 0, need: 0, drop: 1, cost: 40 }); save(); renderPlan();
+};
+function renderWeek() {
+  const box = $('#weekList'); box.replaceChildren();
+  DAYS.forEach((d, i) => {
+    const row = document.createElement('div'); row.className = 'wk'; row.dataset.d = i;
+    const b = document.createElement('b'); b.textContent = d;
+    const inp = document.createElement('input'); inp.maxLength = 60; inp.placeholder = 'что фармить'; inp.value = S.plan.week[i];
+    inp.addEventListener('input', () => { S.plan.week[i] = inp.value.slice(0, 60); save(); });
+    row.append(b, inp); box.append(row);
+  });
+  markToday();
+}
+function markToday() {
+  const idx = (shifted().getUTCDay() + 6) % 7;
+  $$('#weekList .wk').forEach(r => r.classList.toggle('today', +r.dataset.d === idx));
+}
+
+/* ====================================================================
+   5. ДАННЫЕ: экспорт, импорт, сброс
+   ==================================================================== */
+$('#btnExport').onclick = () => {
+  const payload = { app: 'wuwa-helper', version: 2, exportedAt: new Date().toISOString(), data: S };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'wuwa-helper-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  toast('Файл сохранён');
+};
+$('#btnImport').onclick = () => $('#fileImport').click();
+$('#fileImport').onchange = e => {
+  const file = e.target.files[0]; if (!file) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const j = JSON.parse(rd.result), obj = (j && j.data) || j;
+      if (!obj || typeof obj !== 'object' || !(obj.wp || obj.tasks || obj.gacha || obj.plan)) throw new Error('bad');
+      S = sanitize(merge(defaults(), obj)); save(); initAll(); toast('Данные импортированы');
+    } catch (err) { toast('Не удалось прочитать файл', 'bad'); }
+  };
+  rd.onerror = () => toast('Не удалось прочитать файл', 'bad');
+  rd.readAsText(file); e.target.value = '';
+};
+$('#btnWipe').onclick = () => {
+  if (!confirm('Удалить все данные без возможности восстановления?')) return;
+  try { localStorage.removeItem(KEY); localStorage.removeItem(OLD_KEY); } catch (e) {}
+  S = sanitize(defaults()); save(); initAll(); toast('Все данные сброшены');
 };
 
-/* ---------- запуск ---------- */
-renderWp(); renderTasks();
-setInterval(() => { renderWp(); $('#resetIn').textContent = 'Ежедневный сброс через ' + fmtLeft(nextResetMs()); }, 1000);
-setInterval(renderTasks, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { renderWp(); renderTasks(); } });
+/* ====================================================================
+   ЗАПУСК
+   ==================================================================== */
+function setControls() {
+  $('#wpTarget').value = S.wp.target; $('#optSound').checked = S.wp.sound; $('#optPush').checked = S.wp.push;
+  $('#region').value = S.region;
+  const g = S.gacha;
+  $('#gAstrite').value = g.astrite; $('#gConvenes').value = g.convenes; $('#gPity').value = g.pity;
+  $('#gGuar').value = g.guar; $('#gCopies').value = g.copies;
+  for (const id in CF) $('#' + id).value = S.cfg[CF[id]];
+  markChips(); updatePermNote();
+}
+function initAll() {
+  setControls(); renderWp(); renderTasks(); renderPlan(); renderWeek(); calcGacha(); showTab(S.tab);
+}
+load(); initAll();
+
+setInterval(() => {
+  renderWp(); renderTimers();
+  if (checkReset()) { renderTasks(); toast('Сервер сбросился: галочки очищены', 'gold'); }
+}, 1000);
+setInterval(() => { updatePlanSummary(); markToday(); }, 30000);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  renderWp(); if (checkReset()) renderTasks(); updatePlanSummary();
+});
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
